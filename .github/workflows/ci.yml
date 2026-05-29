@@ -1,0 +1,42 @@
+name: YMLAS CI
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  validate:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Upgrade Pip
+        run: |
+          python -m pip install --upgrade pip
+
+      - name: Install Dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Validate Python Syntax
+        run: |
+          python -m py_compile app.py
+
+      - name: Verify Flask Imports
+        run: |
+          python -c "from app import app; print('Flask app loaded successfully')"
+
+      - name: CI Passed
+        run: |
+          echo "YMLAS validation completed successfully"
+
