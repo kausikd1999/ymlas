@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}
+Logs - YMLAS
+{% endblock %}
+
+{% block content %}
+
+<h1 class="mb-4">📜 Logs Management</h1>
+
+<div class="metric-card mb-4">
+
+    <div class="row">
+
+        <div class="col-md-5">
+
+            <input
+                type="text"
+                id="searchInput"
+                class="form-control"
+                placeholder="Search logs...">
+
+        </div>
+
+        <div class="col-md-3">
+
+            <select
+                id="levelFilter"
+                class="form-select">
+
+                <option value="ALL">
+                    All Levels
+                </option>
+
+                <option value="INFO">
+                    INFO
+                </option>
+
+                <option value="WARNING">
+                    WARNING
+                </option>
+
+                <option value="ERROR">
+                    ERROR
+                </option>
+
+            </select>
+
+        </div>
+
+        <div class="col-md-2">
+
+            <button 
+                id="refreshButton"
+                class="btn btn-primary w-100">
+                Refresh
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div class="metric-card">
+
+    <h3 class="mb-4">
+        Application Logs
+    </h3>
+
+    <div class="table-responsive">
+
+        <table class="table table-dark table-hover align-middle">
+
+            <thead>
+
+                <tr>
+
+                    <th>Timestamp</th>
+
+                    <th>Level</th>
+
+                    <th>Service</th>
+
+                    <th>Message</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody id="logsTableBody">
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+
+<script src="{{ url_for('static',
+filename='js/logs.js') }}"></script>
+
+{% endblock %}
