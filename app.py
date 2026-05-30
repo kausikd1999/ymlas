@@ -104,6 +104,7 @@ def health():
 
 monitor_logger = logging.getLogger("Monitoring")
 
+
 @app.route("/api/system")
 def system_metrics():
 
@@ -152,6 +153,7 @@ def system_metrics():
         "uptime": f"{uptime_hours}h {uptime_minutes}m"
 
     })
+
 
 logger = logging.getLogger("YMLAS")
 logger.setLevel(logging.INFO)

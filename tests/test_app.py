@@ -146,6 +146,7 @@ def test_deployments_api(client):
 # HEALTH LOGGING TEST
 # ==========================================
 
+
 def test_health_logging(client, caplog):
 
     with caplog.at_level("INFO"):
@@ -167,5 +168,4 @@ def test_health_logging(client, caplog):
             "Health check requested" in msg
 
             for msg in messages
-
         )
