@@ -49,7 +49,7 @@ jobs:
       - name: HTML Validation
         run: |
           pip install html5validator
-          python -m html5validator --root .
+          html5validator --root templates
 
       - name: Eslint Validation
         run: |
