@@ -62,7 +62,7 @@ jobs:
         continue-on-error: true
         run: |
           npm install -g stylelint
-          stylelint "**/*.css"
+          stylelint "static/css/**/*.css"
 
       - name: Flask Smoke Test
         run: |
