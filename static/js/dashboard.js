@@ -145,4 +145,4 @@ async function loadMetrics() {
 
 loadMetrics();
 
-setInterval(loadMetrics, 2000)
+setInterval(loadMetrics, 2000);
