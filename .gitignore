@@ -24,3 +24,7 @@ logs/*.log
 
 # Flask
 instance/
+
+# CI Backup
+.github/workflows/ci_backup.yml
+

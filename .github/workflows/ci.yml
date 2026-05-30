@@ -36,6 +36,45 @@ jobs:
         run: |
           python -c "from app import app; print('Flask app loaded successfully')"
 
+      - name: Install and Run Linter
+        run: |
+          pip install flake8
+          python -m flake8 .
+
+      - name: Run Unit Tests
+        run: |
+          pip install pytest
+          python -m pytest .
+
+      - name: HTML Validation
+        run: |
+          pip install html5validator
+          python -m html5validator --root .
+
+      - name: Eslint Validation
+        run: |
+          npm install -g eslint
+          eslint .
+      
+      - name: Stylelint Validation
+        run: |
+          npm install -g stylelint
+          stylelint "**/*.css"
+
+      - name: Flask Smoke Test
+        run: |
+          python -m pytest tests/test_app.py -v
+
+      - name: Check for Security Vulnerabilities
+        run: |
+          pip install bandit
+          python -m bandit -r .
+
+      - name: pip-audit Validation
+        run: |
+          pip install pip-audit
+          python -m pip_audit
+     
       - name: CI Passed
         run: |
           echo "YMLAS validation completed successfully"
