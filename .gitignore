@@ -28,3 +28,9 @@ instance/
 # CI Backup
 .github/workflows/ci_backup.yml
 
+# Docker Hub credentials
+dockerhub-githubaction-pat.rtf
+
+# Local security scan reports
+trivy-high-critical.txt
+trivy-scan-report.txt

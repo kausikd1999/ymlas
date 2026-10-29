@@ -57,7 +57,7 @@ jobs:
         run: |
           npm install -g eslint
           eslint static/js
-      
+
       - name: Stylelint Validation
         continue-on-error: true
         run: |
@@ -79,7 +79,7 @@ jobs:
         run: |
           pip install pip-audit
           python -m pip_audit
-     
+
       - name: CI Passed
         run: |
           echo "YMLAS validation completed successfully"
@@ -127,6 +127,24 @@ jobs:
           docker stop ymlas-container || true
           docker rm ymlas-container || true
 
-      - name: CI Passed for Docker
+      - name: Install Trivy
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: ymlas-app:${{ github.sha }}
+          format: table
+          severity: HIGH,CRITICAL
+          exit-code: '0'
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Tag Image for Docker Hub
         run: |
-          echo "Docker validation completed successfully"
+          docker tag ymlas-app:${{ github.sha }} kausikdas1999/ymlas:${{ github.sha }}
+
+      - name: Push Image to Docker Hub
+        run: |
+          docker push kausikdas1999/ymlas:${{ github.sha }}
