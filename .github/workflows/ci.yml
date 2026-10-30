@@ -148,25 +148,79 @@ jobs:
       - name: Push Image to Docker Hub
         run: |
           docker push kausikdas1999/ymlas:${{ github.sha }}
-
-
-
   deploy:
     name: Deploy to AWS EC2
     needs: [validate, docker]
     runs-on: ubuntu-latest
 
+    permissions:
+      id-token: write
+      contents: read
+
     steps:
-      - name: Deploy YMLAS to EC2
-        uses: appleboy/ssh-action@v1.2.0
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            set -e
-            cd "${{ secrets.EC2_DEPLOY_PATH }}"
-            sed -i 's|image: kausikdas1999/ymlas:.*|image: kausikdas1999/ymlas:${{ github.sha }}|' compose.yaml
-            sudo docker compose pull ymlas
-            sudo docker compose up -d ymlas
-            sudo docker compose ps
+          role-to-assume: arn:aws:iam::485154095721:role/YMLAS-GitHub-Deploy-Role
+          aws-region: us-east-1
+
+      - name: Deploy YMLAS using SSM
+        shell: bash
+        run: |
+          set -e
+
+          INSTANCE_ID="i-03574b0b9f81b2a5a"
+
+          cat > ssm-commands.json <<EOF
+          {
+            "commands": [
+              "set -e",
+              "cd /home/ubuntu/ymlas-deployment",
+              "sed -i 's|image: kausikdas1999/ymlas:.*|image: kausikdas1999/ymlas:${{ github.sha }}|' compose.yaml",
+              "sudo docker compose pull ymlas",
+              "sudo docker compose up -d ymlas",
+              "sudo docker compose ps"
+            ]
+          }
+          EOF
+
+          COMMAND_ID=$(aws ssm send-command \
+            --instance-ids "$INSTANCE_ID" \
+            --document-name "AWS-RunShellScript" \
+            --parameters file://ssm-commands.json \
+            --query "Command.CommandId" \
+            --output text)
+
+          echo "SSM Command ID: $COMMAND_ID"
+
+          for i in {1..60}; do
+            STATUS=$(aws ssm get-command-invocation \
+              --command-id "$COMMAND_ID" \
+              --instance-id "$INSTANCE_ID" \
+              --query "Status" \
+              --output text 2>/dev/null || echo "Pending")
+
+            echo "Deployment status: $STATUS"
+
+            if [ "$STATUS" = "Success" ]; then
+              aws ssm get-command-invocation \
+                --command-id "$COMMAND_ID" \
+                --instance-id "$INSTANCE_ID" \
+                --query "StandardOutputContent" \
+                --output text
+              exit 0
+            fi
+
+            if [[ "$STATUS" == "Failed" || "$STATUS" == "TimedOut" || "$STATUS" == "Cancelled" || "$STATUS" == "Cancelling" || "$STATUS" == "DeliveryTimedOut" || "$STATUS" == "ExecutionTimedOut" || "$STATUS" == "Undeliverable" || "$STATUS" == "Terminated" ]]; then
+              aws ssm get-command-invocation \
+                --command-id "$COMMAND_ID" \
+                --instance-id "$INSTANCE_ID" \
+                --output json
+              exit 1
+            fi
+
+            sleep 5
+          done
+
+          echo "Deployment timed out while waiting for SSM."
+          exit 1
