@@ -179,6 +179,7 @@ jobs:
               "sed -i 's|image: kausikdas1999/ymlas:.*|image: kausikdas1999/ymlas:${{ github.sha }}|' compose.yaml",
               "sudo docker compose pull ymlas",
               "sudo docker compose up -d ymlas",
+              "sudo /usr/local/bin/ymlas-refresh-logs.sh",
               "sudo docker compose ps"
             ]
           }
